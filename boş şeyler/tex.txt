@@ -1,0 +1,83 @@
+Bu çalışmada, günümüz dünyasında kalp hastalıklarına daha hızlı ve pratik teşhis koymak, olası risklere karşı erken hareket etmek ve bilgisayarlı görüyü etkin bir şekilde kullanmayı hedef alır. Güçlü bir veriseti kullanılarak model eğitimi yapılacak olup makine öğrenmesi metodlarını etkin bir şekilde kullanmayı amaçlanmıştır. Verisetinin eksik kısımları belirlenmiş olup eksik kısımları kullanışlı metodlar ile veriyi bozmadan doldurulmuştur. 
+Bu çalışmanın temel amacı, belirlenen bazı makine öğrenmesi metodlarını bu veri için uygun olup olmadığını karşılaştırmak ve en uygun olanı veri üstünde tahminde yapmaya çalıştırmaktır. 
+
+
+Bu çalışmada, Makine Öğrenmesi (ML) yöntemlerinin tıbbi karar verme süreçlerine uygulanabilirliği, özellikle kalp hastalığı riski tahmini üzerine odaklanılarak incelenmiştir. Kardiyovasküler hastalıkların yaygınlığı göz önüne alındığında, hızlı, objektif ve erken teşhis koyabilen prediktif modellerin geliştirilmesi hedeflenmiştir.
+
+Kalp hastalığı riskini tahmin etmeye yönelik bu çalışmada, $980$ hastaya ait $11$ farklı özellikten oluşan veri seti kullanılmıştır. Analiz öncesinde, veri setindeki eksik gözlemler belirlenmiş ve veri bütünlüğünü bozmayacak şekilde seçilen bilimsel veri imputasyon yöntemleriyle doldurulmuştur.
+
+Bu çalışmanın temel amacı, Kalp Hastalığı Riski Tahmini problemine yönelik en uygun Makine Öğrenmesi (ML) sınıflandırma modelini belirlemektir. Bu doğrultuda, K-En Yakın Komşu (KNN), Naive Bayes, Karar Ağaçları, Lojistik Regresyon ve XGBoost gibi çoklu algoritmaların performansları karşılaştırılmıştır. Modellerin başarımları, sadece Doğruluk (Accuracy) değil, aynı zamanda Hassasiyet (Precision), Özgüllük (Specificity), Geri Çağırma (Recall) ve F1 Skoru gibi klinik açıdan önem taşıyan performans metrikleri kullanılarak kapsamlı bir şekilde değerlendirilmiştir. Nihai hedef, bu metriklerde en yüksek başarıyı sergileyen modeli eğiterek, klinik karar verme süreçlerine yardımcı olabilecek yüksek tahmin gücüne sahip bir sistem sunmaktır.
+
+
+
+Anahtar Kelimeler: Makine Öğrenmesi, Kalp Hastalığı Riski Tahmini, Sınıflandırma Algoritmaları, Veri İmputasyonu
+ 
+onnx kullanamadık çünkü py 3.13 desteklemiyor
+
+
+
+#########33
+using Python.Runtime;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Microsoft.ML.OnnxRuntime;
+
+namespace Heart_Disease_App
+{
+    public partial class Form1 : Form
+    {
+        string PYTHON_HOME = @"C:\Users\kerem\AppData\Local\Programs\Python\Python310";
+
+        public Form1()
+        {
+            InitializeComponent();
+
+            Environment.SetEnvironmentVariable("PYTHONHOME", PYTHON_HOME);
+            Environment.SetEnvironmentVariable("PYTHONPATH",
+                PYTHON_HOME + @"\Lib;" +
+                PYTHON_HOME + @"\Lib\site-packages");
+            PythonEngine.Initialize();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            PythonEngine.Shutdown();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            using (Py.GIL())
+            {
+                // Python dosyasını import et
+                dynamic modelPy = Py.Import("model");
+
+                // Kullanıcıdan değerleri al
+                double age = double.Parse(txtbx_age.Text);
+                double sex = double.Parse(txtbx_gender.Text);
+                double chol = double.Parse(txtbx_cholesterol.Text);
+                double trestbps = double.Parse(txtbx_trestbps.Text);
+                double fbs = double.Parse(txtbx_fbs.Text);
+                double thalc = double.Parse(txtbx_thalc.Text);
+                double cp_type = double.Parse(txtbx_chest_pain_type.Text);
+                double restecg = double.Parse(txtbx_restecg.Text);
+                double dataset = double.Parse(txtbx_dataset.Text);
+
+                // Tahmin fonksiyonunu çağır
+                dynamic result = modelPy.tahmin_et(age, sex, chol, trestbps, fbs, thalc, cp_type, restecg, dataset);
+
+                // Sonucu göster
+                if ((int)result == 1)
+                    txtbx_predict.Text = "Kalp hastalığı riski var!";
+                else
+                    txtbx_predict.Text = "Kalp hastalığı riski yok.";
+            }
+        }
+    }
+}
