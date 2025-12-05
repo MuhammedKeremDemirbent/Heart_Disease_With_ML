@@ -161,7 +161,7 @@ class choosing_model(testtrain):
         onnx_model = onnxmltools.convert_xgboost(self.xgb_model, initial_types=initial_type)
 
         # ONNX dosyasını kaydetme
-        onnxmltools.utils.save_model(onnx_model, 'heart_disease_model.onnx')
+        onnxmltools.utils.save_model(onnx_model, 'Trash\heart_disease_model.onnx')
         
 
         #3.8.0
