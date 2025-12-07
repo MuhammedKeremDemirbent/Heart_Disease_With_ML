@@ -27,4 +27,21 @@ if __name__ =="__main__":
 
     #Yorum satırı olan yerlere gerek yok PTAG hepsini miras aldı
 
-    
+    """
+        İlk olarak data_manipulating.py dosyasindaki dataManipulating sinifi çağrilir. 
+        Bu sinif veri setini yükler, eksik verileri doldurur ve kategorik değişkenleri kodlar.
+
+        İkinci olarak test_train.py dosyasindaki testtrain sinifi çağrilir.
+        Bu sinif, veri setini eğitim ve test setlerine böler ve SMOTE kullanarak eğitim setindeki dengesizliği giderir.
+
+        Üçüncü olarak choosing_model.py dosyasindaki choosing_model sinifi çağrilir.
+        Bu sinif, çeşitli makine öğrenimi modellerini eğitir ve performanslarini karşilaştirir.
+
+        Son olarak p_tuning_and_graphs.py dosyasindaki p_tuning_and_graphs sinifi çağrilir.
+        Bu sinif, modellerin hiperparametrelerini ayarlar ve performans sonuçlarini grafiklerle görselleştirir.
+
+        Bu yapiyla, kalp krizi riskini tahmin etmek için kapsamli bir makine öğrenimi süreci gerçekleştirilir.
+        
+        Bu adimlardan sonra deep_learning.py dosyasindaki deep_learning sinifi çağrilir.
+        Bu sinif, derin öğrenme modellerini kullanarak kalp krizi riskini tahmin eder.
+    """
