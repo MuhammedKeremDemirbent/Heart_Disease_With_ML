@@ -38,7 +38,7 @@ class deep_learning(testtrain):
             self.X_train, 
             self.y_train_smote, 
             batch_size=32, 
-            epochs=300,           
+            epochs=1000,           
             #validation_split=0.1, 
             #callbacks=[es]        
         )
