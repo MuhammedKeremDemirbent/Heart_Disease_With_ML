@@ -1,5 +1,6 @@
 from data_manipulating import dataManipulating
 import pandas as pd
+import matplotlib.pyplot as plt
 #2.0.0 Model Eğitimi 
 
 """
@@ -33,15 +34,37 @@ class testtrain(dataManipulating):
 
         #2.2.2 VIF Analizi (Verilerin kendi arasındaki etkileşim oranlarını ölçer verilerin VIF değeri 5 ten yüksekse sıkıntı oluyor)
 
-        X_vif_input = sm.add_constant(self.last_data_without_outliers) 
+        
+        import statsmodels.api as sm
+        from statsmodels.stats.outliers_influence import variance_inflation_factor
+        import matplotlib.pyplot as plt
 
+        X_vif_input = sm.add_constant(self.last_data_without_outliers) 
         vif_data = pd.DataFrame()
         vif_data["feature"] = X_vif_input.columns
-        vif_data["VIF"] = [variance_inflation_factor(X_vif_input.values, i) 
-                        for i in range(len(X_vif_input.columns))]
+        vif_data["VIF"] = [variance_inflation_factor(X_vif_input.values, i) for i in range(len(X_vif_input.columns))]
+        
+        vif_data = vif_data[vif_data['feature'] != 'const']
+        vif_data = vif_data.sort_values(by='VIF', ascending=True)
 
-        print("\n--- Result of VIF Analysis ---")
-        print(vif_data.sort_values(by='VIF', ascending=False).head(30).to_markdown(index=False))
+        plt.figure(figsize=(10, 8))
+        colors = ['red' if x > 4 else 'mediumseagreen' for x in vif_data['VIF']]
+        bars = plt.barh(vif_data['feature'], vif_data['VIF'], color=colors)
+        plt.axvline(x=4, color='orange', linestyle='--', linewidth=2, label='Threshold (4.0)')
+        
+        plt.title('VIF (Variance Inflation Factor) Analysis', fontsize=14)
+        plt.xlabel('VIF Value (> 4 High Multicollinearity Risk)', fontsize=12)
+        plt.ylabel('Features', fontsize=12)
+        plt.legend(loc='lower right')
+        
+        for bar in bars:
+            width = bar.get_width()
+            plt.text(width + 0.1, bar.get_y() + bar.get_height()/2, f'{width:.2f}', va='center')
+
+        plt.tight_layout()
+        plt.show()
+        
+        print("\n--- VIF Grafiği Oluşturuldu ---")
         print("\n--- NOT: OLS (Lineer Regresyon) model analizi, sirali siniflama problemi için uygun olmadiği için çikarilmiştir. ---")
 
         #2.3.0 Datayı scale edeceğiz bir verinin diğer verileri etkilemesi istemiyoruz 
@@ -55,3 +78,4 @@ class testtrain(dataManipulating):
         self.X_test = StandardScale.transform(self.x_test)
 
 #########################################################################################################################################################################################
+#stratify = y

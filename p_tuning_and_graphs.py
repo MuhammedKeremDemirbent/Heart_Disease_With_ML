@@ -70,8 +70,9 @@ class p_tuning_and_graphs(choosing_model):
         #plt.show()
         plt.close()
 
-        #4.5.0 Performans skorları (F1)
-        from sklearn.metrics import accuracy_score, f1_score
+        #4.5.0 Performans skorları (Accuracy, F1, Recall, Precision)
+        # GÜNCELLEME: Recall ve Precision kütüphaneleri eklendi
+        from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score
         from collections import OrderedDict
 
         #4.5.1 Tüm modelleri ve tahminlerini bir sözlükte toplayalım
@@ -92,16 +93,18 @@ class p_tuning_and_graphs(choosing_model):
         #4.5.2 Performans metrikleri
         print("\n\n--- Performance Metrics of All Models ---")
         for model_name, y_pred in models.items():
-            # Doğruluk (Accuracy)
-            accuracy = accuracy_score(self.y_test, y_pred)
-            
-            # F1 Skoru (Çok sınıflı olduğu için 'weighted' ortalama kullanıldı)
-            f1 = f1_score(self.y_test, y_pred, average='weighted')
+            #4.5.3 Modellerin performans metriklerini hesaplama
+            accuracy = accuracy_score(self.y_test, y_pred)          
+            f1 = f1_score(self.y_test, y_pred, average='weighted')      
+            recall = recall_score(self.y_test, y_pred, average='weighted')
+            precision = precision_score(self.y_test, y_pred, average='weighted', zero_division=0)
             
             performance_results.append({
                 'Model': model_name,
                 'Accuracy': f'{accuracy:.4f}',
-                'F1 Score': f'{f1:.4f}'
+                'F1 Score': f'{f1:.4f}',
+                'Recall': f'{recall:.4f}',     
+                'Precision': f'{precision:.4f}' 
             })
 
         #4.5.3 Sonuçları DataFrame'e çevirip yazdırma
@@ -114,48 +117,66 @@ class p_tuning_and_graphs(choosing_model):
 
         sonuc_df = pd.DataFrame(performance_results)
 
+        # String'den float'a çevirme (Grafik için)
         sonuc_df['Accuracy'] = sonuc_df['Accuracy'].astype(float)
         sonuc_df['F1 Score'] = sonuc_df['F1 Score'].astype(float)
+        sonuc_df['Recall'] = sonuc_df['Recall'].astype(float)       
+        sonuc_df['Precision'] = sonuc_df['Precision'].astype(float) 
 
-        sonuc_df_sorted = sonuc_df.sort_values(by='F1 Score', ascending=False) #Büyükten küçüğe sıralama
+        sonuc_df_sorted = sonuc_df.sort_values(by='F1 Score', ascending=False) # F1'e göre sıralama
         
-        fig, axes = plt.subplots(1, 2, figsize=(16, 7))
-        plt.style.use('ggplot') # Daha güzel bir stil 
+        # GÜNCELLEME: Grafik alanı 2x2 (4'lü) olacak şekilde ayarlandı
+        fig, axes = plt.subplots(2, 2, figsize=(18, 12))
+        axes = axes.flatten() 
+        
+        plt.style.use('ggplot') 
+
+        # Grafik çizdirmek için yardımcı fonksiyon 
+        def draw_barplot(ax, x_col, title, palette):
+            sns.barplot(
+                x=x_col, 
+                y='Model', 
+                data=sonuc_df_sorted, 
+                ax=ax, 
+                palette=palette
+            )
+            ax.set_title(title)
+            ax.set_xlim(0.0, 1.1) 
+            ax.set_xlabel(title)
+            ax.set_ylabel('')
+            
+            # Değerleri çubukların ucuna yazdırma
+            for index, value in enumerate(sonuc_df_sorted[x_col]):
+                ax.text(value + 0.005, index, f'{value:.4f}', va='center', fontsize=10, fontweight='bold')
+
+        # Modelin toplam doğruluk oranı (Yanıltıcı)
+        draw_barplot(axes[0], 'Accuracy', 'Accuracy Score', 'viridis')
+
+        # Modelin F1 skoru RECALL İLE PRECİSİON ARASINDAKİ UYUM
+        draw_barplot(axes[1], 'F1 Score', 'F1 Score', 'magma')
 
         
-        sns.barplot(
-            x='Accuracy', 
-            y='Model', 
-            data=sonuc_df_sorted, 
-            ax=axes[0], 
-            palette='viridis' # Renk paleti
-        )
-        axes[0].set_title('Modellerin Başarı Skorları (Accuracy)')
-        axes[0].set_xlim(0.0, 1.0) 
-        axes[0].set_xlabel('Accuracy Skoru')
+        draw_barplot(axes[2], 'Recall', 'Recall Score', 'rocket')
 
-        for index, value in enumerate(sonuc_df_sorted['Accuracy']):
-            axes[0].text(value + 0.005, index, f'{value:.4f}', va='center')
-
-        sns.barplot(
-            x='F1 Score', 
-            y='Model', 
-            data=sonuc_df_sorted, 
-            ax=axes[1], 
-            palette='magma' # Farklı bir renk paleti
-        )
-        axes[1].set_title('Modellerin F1 Skorları')
-        axes[1].set_xlim(0.0, 1.0)
-        axes[1].set_xlabel('F1 Skoru')
-        axes[1].set_ylabel('') 
-
-        for index, value in enumerate(sonuc_df_sorted['F1 Score']): # Değer yazdırma
-            axes[1].text(value + 0.005, index, f'{value:.4f}', va='center')
+       
+        draw_barplot(axes[3], 'Precision', 'Precision Score', 'mako')
 
         # Genel Başlık ve Düzenlemeler
-        plt.suptitle('Makine Öğrenimi Modellerinin Performans Karşılaştırması', fontsize=16)
-        plt.tight_layout(rect=[0, 0.03, 1, 0.95]) #Grafiklerin sıkışmasını önlemek için 
-        #plt.show()
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95]) 
+        plt.subplots_adjust(top=0.92, hspace=0.3, wspace=0.25)
+        plt.show()
 
 
-########################################################################################################################################################
+
+
+
+
+        #Accuracy F1 Recall Precision
+
+        """
+        Accuracy: Modelin doğru tahminlerinin toplam tahminlere oranıdır. Ancak, dengesiz veri setlerinde yanıltıcı olabilir.
+        F1 Score: Precision ve Recall'un harmonik ortalamasıdır. Dengesiz
+        veri setlerinde daha güvenilir bir performans ölçütüdür.
+        Recall: Modelin gerçek pozitifleri ne kadar iyi yakaladığını gösterir. Kritik durumlarda önemlidir.
+        Precision: Modelin pozitif tahminlerinin ne kadarının doğru olduğunu gösterir. Yanlış pozitiflerin maliyetli olduğu durumlarda önemlidir.        
+        """

@@ -18,6 +18,7 @@ if __name__ =="__main__":
     #TT = testtrain()
     #CM = choosing_model()
     PTAG = p_tuning_and_graphs()
+    
     print("\nProgram Başariyla Tamamlandi. Grafikler gösterildi...")
     print("Deep Learning başlatiliyor")
 
