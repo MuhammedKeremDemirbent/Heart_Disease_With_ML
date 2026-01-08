@@ -84,7 +84,7 @@ class choosing_model(testtrain):
         #3.3.0 SVM
         from sklearn.svm import SVC 
 
-        svc= SVC(kernel="rbf") 
+        svc= SVC(kernel="rbf",class_weight="balanced") 
         svc.fit(self.X_train,self.y_train_smote)
 
         self.y_pred_svc = svc.predict(self.X_test)
@@ -92,6 +92,33 @@ class choosing_model(testtrain):
 
         print("svc")
         print(self.cm_svc)
+
+        from sklearn.pipeline import Pipeline
+        from sklearn.preprocessing import StandardScaler
+        from sklearn.svm import SVC
+        from skl2onnx import convert_sklearn
+        from skl2onnx.common.data_types import FloatTensorType
+        import onnxmltools.utils
+        from sklearn.pipeline import Pipeline
+
+        pipe = Pipeline([
+            ('scaler', StandardScaler()), 
+            ('svc', SVC(kernel="rbf", class_weight="balanced", probability=True)) 
+        ])
+
+        pipe.fit(self.X_train_smote, self.y_train_smote) 
+
+        # 2. ONNX'e Dönüştür
+        # Giriş tipi ham verinin boyutuna göre (X_train_smote ile aynı)
+        initial_type = [('input', FloatTensorType([None, self.X_train_smote.shape[1]]))]
+
+        # zipmap=False C# için önemli
+        onnx_model = convert_sklearn(pipe, initial_types=initial_type, target_opset=12, 
+                                        options={'zipmap': False})
+
+        # 3. Kaydet (Eski dosyanın üzerine yazsın)
+        onnxmltools.utils.save_model(onnx_model, 'Trash/heart_disease_model.onnx')
+        print("Model başarıyla düzeltildi ve kaydedildi.")
 
         #3.4.0 Naive Bayes
         from sklearn.naive_bayes import GaussianNB #Sürekli bir değer ise 
@@ -150,7 +177,7 @@ class choosing_model(testtrain):
 
         print("XGBoost")
         print(self.cm_xgb)
-
+        """
         #3.7.1 Modeli uygulamaya uygun hale getirmek
         import xgboost as xgb
         import onnxmltools
@@ -162,7 +189,7 @@ class choosing_model(testtrain):
 
         # ONNX dosyasını kaydetme
         onnxmltools.utils.save_model(onnx_model, 'Trash\heart_disease_model.onnx')
-        
+        """
 
         #3.8.0
         from sklearn.ensemble import GradientBoostingClassifier
@@ -178,10 +205,52 @@ class choosing_model(testtrain):
         self.y_pred_gbc = self.gbc.predict(self.X_test)
 
         self.cm_gbc = confusion_matrix(self.y_test, self.y_pred_gbc)
-
         print("GRADİENT BOOST")
         print(self.cm_gbc)
 
+
+
+
+        confusion_matrices = [
+            (self.cm_gbc, "Gradient Boosting"),
+            (self.cm_knn, "KNN"),
+            (self.cm_svc, "SVM")
+        ]
+
+        # Döngü ile hepsini tek tek Matplotlib kullanarak çiz
+        for cm, title in confusion_matrices:
+            self.draw_matrix_matplotlib(cm, title)
+
+    # Bu fonksiyonu sınıfın içine (def __init__ hizasına değil, sınıfın metodu olarak) ekle
+    def draw_matrix_matplotlib(self, cm, title):
+        fig, ax = plt.subplots(figsize=(5, 5))
+        
+        # Matrisi renklendir (imshow kullanılır)
+        cax = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Purples)
+        ax.set_title(f"{title} Confusion Matrix")
+        
+        # Yan tarafa renk barı ekle
+        fig.colorbar(cax)
+
+        # Eksenleri ayarla
+        tick_marks = np.arange(len(cm))
+        ax.set_xticks(tick_marks)
+        ax.set_yticks(tick_marks)
+        ax.set_xlabel('Predicted')
+        ax.set_ylabel('Actual')
+
+        # SAYILARI KUTULARIN İÇİNE YAZDIRMA (En önemli kısım)
+        thresh = cm.max() / 2.
+        for i in range(cm.shape[0]):
+            for j in range(cm.shape[1]):
+                ax.text(j, i, format(cm[i, j], 'd'),
+                        horizontalalignment="center",
+                        verticalalignment="center",
+                        color="white" if cm[i, j] > thresh else "black",
+                        fontsize=12, fontweight='bold')
+
+        plt.tight_layout() # Kenar boşluklarını otomatik ayarla
+        plt.show()
 
 #########################################################################################################################################################################
 

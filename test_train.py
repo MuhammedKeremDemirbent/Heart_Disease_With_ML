@@ -77,5 +77,9 @@ class testtrain(dataManipulating):
         self.X_train =StandardScale.fit_transform(self.X_train_smote)
         self.X_test = StandardScale.transform(self.x_test)
 
+        print("--- MODELİN BEKLEDİĞİ SÜTUN SIRASI ---")
+        # Eğer X_train bir pandas DataFrame ise:
+        print(list(self.last_data_without_outliers.columns))
+
 #########################################################################################################################################################################################
 #stratify = y

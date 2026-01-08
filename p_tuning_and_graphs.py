@@ -15,6 +15,120 @@ class p_tuning_and_graphs(choosing_model):
     def __init__(self):
         super().__init__()
 
+        import pandas as pd # Series işlemi için gerekli olabilir
+
+        # --- AYARLAR ---
+        navy = '#000080'    # Lacivert
+        red = '#FF0000'     # Kırmızı
+        yellow = '#FFD700'  # Sarı
+        green = '#008000'   # Yeşil
+        
+        hd_res = (19.2, 10.8)
+        lbl_size = 20
+        tick_size = 18
+        val_size = 22
+
+        total_count = len(self.last_data)
+
+        # ==========================================
+        # 1. CİNSİYET (GENDER)
+        # ==========================================
+        gender_counts = self.last_data['Female'].value_counts()
+        male_count = gender_counts.get(0, 0)   
+        female_count = gender_counts.get(1, 0) 
+
+        plt.figure(figsize=hd_res)
+        bars = plt.bar(['Male', 'Female'], [male_count, female_count], color=[navy, red])
+        
+        for bar in bars:
+            plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 5, 
+                     int(bar.get_height()), ha='center', va='bottom', fontsize=val_size, fontweight='bold')
+
+        plt.ylabel('Number of Patients', fontsize=lbl_size)
+        plt.xticks(fontsize=tick_size)
+        plt.yticks(fontsize=tick_size)
+        plt.show()
+
+        # ==========================================
+        # 2. KAYNAK BÖLGE (DATASET SOURCE)
+        # ==========================================
+        c_cleveland = self.last_data['Cleveland'].sum()
+        c_hungary = self.last_data['Hungary'].sum()
+        c_switz = self.last_data['Switzerland'].sum()
+        c_va = total_count - (c_cleveland + c_hungary + c_switz)
+
+        regions = ['Cleveland', 'Hungary', 'Switzerland', 'VA Long Beach']
+        r_counts = [c_cleveland, c_hungary, c_switz, c_va]
+        
+        plt.figure(figsize=hd_res)
+        # Renkler: Lacivert, Yeşil, Kırmızı, Sarı
+        bars = plt.bar(regions, r_counts, color=[navy, green, red, yellow])
+
+        for bar in bars:
+            plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 5, 
+                     int(bar.get_height()), ha='center', va='bottom', fontsize=val_size, fontweight='bold')
+
+        plt.xlabel('Regions', fontsize=lbl_size)
+        plt.ylabel('Number of Patients', fontsize=lbl_size)
+        plt.xticks(fontsize=tick_size)
+        plt.yticks(fontsize=tick_size)
+        plt.show()
+
+    
+        # ==========================================
+        # 6. KAN BASINCI (TRESTBPS)
+        # ==========================================
+        plt.figure(figsize=hd_res)
+        plt.hist(self.last_data['Trestbps'], bins=20, color=navy, edgecolor='black')
+        
+        plt.xlabel('Resting Blood Pressure (mm Hg)', fontsize=lbl_size)
+        plt.ylabel('Frequency', fontsize=lbl_size)
+        plt.xticks(fontsize=tick_size)
+        plt.yticks(fontsize=tick_size)
+        plt.show()
+
+        # ==========================================
+        # 7. MAKSİMUM NABIZ (THALC)
+        # ==========================================
+        plt.figure(figsize=hd_res)
+        plt.hist(self.last_data['Thalc'], bins=20, color=navy, edgecolor='black')
+
+        plt.xlabel('Max Heart Rate Achieved (Thalach)', fontsize=lbl_size)
+        plt.ylabel('Frequency', fontsize=lbl_size)
+        plt.xticks(fontsize=tick_size)
+        plt.yticks(fontsize=tick_size)
+        plt.show()
+
+        # ==========================================
+        # 8. YAŞ (AGE)
+        # ==========================================
+        plt.figure(figsize=hd_res)
+        plt.hist(self.last_data['Age'], bins=20, color=navy, edgecolor='black')
+
+        plt.xlabel('Age', fontsize=lbl_size)
+        plt.ylabel('Frequency', fontsize=lbl_size)
+        plt.xticks(fontsize=tick_size)
+        plt.yticks(fontsize=tick_size)
+        plt.show()
+
+        # ==========================================
+        # 9. HEDEF DEĞİŞKEN (HEART DISEASE)
+        # ==========================================
+        target_counts = self.last_data['Heart Disease'].value_counts()
+        
+        plt.figure(figsize=hd_res)
+        bars = plt.bar(['Negative (0)', 'Positive (1)'], target_counts.values, color=[green, red])
+        
+        for bar in bars:
+            plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 5, 
+                     int(bar.get_height()), ha='center', va='bottom', fontsize=val_size, fontweight='bold')
+
+        plt.xlabel('Prediction Target', fontsize=lbl_size)
+        plt.ylabel('Number of Patients', fontsize=lbl_size)
+        plt.xticks(fontsize=tick_size)
+        plt.yticks(fontsize=tick_size)
+        plt.show()
+        
         import seaborn as sns
         
         #4.1.0 Gradient Boosting parametrelerin önem sırası
@@ -36,12 +150,7 @@ class p_tuning_and_graphs(choosing_model):
         #plt.show()
         plt.close()
 
-        #4.2.0 Thalc verisinin dağalımı
-        plt.figure(figsize=(12,8))
-        sns.histplot(x='Thalc',data=self.last_data_without_outliers)
-        plt.title('Distribution of Thalc')
-        #plt.show()
-        plt.close()
+        
 
         #4.3.0 Korrelasyon matrisi
         #Bu grafik parametreler arası ilişkiyi ölçer
@@ -125,58 +234,80 @@ class p_tuning_and_graphs(choosing_model):
 
         sonuc_df_sorted = sonuc_df.sort_values(by='F1 Score', ascending=False) # F1'e göre sıralama
         
-        # GÜNCELLEME: Grafik alanı 2x2 (4'lü) olacak şekilde ayarlandı
-        fig, axes = plt.subplots(2, 2, figsize=(18, 12))
-        axes = axes.flatten() 
-        
         plt.style.use('ggplot') 
 
-        # Grafik çizdirmek için yardımcı fonksiyon 
-        def draw_barplot(ax, x_col, title, palette):
-            sns.barplot(
-                x=x_col, 
-                y='Model', 
-                data=sonuc_df_sorted, 
-                ax=ax, 
-                palette=palette
-            )
-            ax.set_title(title)
-            ax.set_xlim(0.0, 1.1) 
-            ax.set_xlabel(title)
-            ax.set_ylabel('')
-            
-            # Değerleri çubukların ucuna yazdırma
-            for index, value in enumerate(sonuc_df_sorted[x_col]):
-                ax.text(value + 0.005, index, f'{value:.4f}', va='center', fontsize=10, fontweight='bold')
 
-        # Modelin toplam doğruluk oranı (Yanıltıcı)
-        draw_barplot(axes[0], 'Accuracy', 'Accuracy Score', 'viridis')
+        plot_df = sonuc_df.sort_values(by='F1 Score', ascending=False).set_index('Model')
 
-        # Modelin F1 skoru RECALL İLE PRECİSİON ARASINDAKİ UYUM
-        draw_barplot(axes[1], 'F1 Score', 'F1 Score', 'magma')
+        plot_df = plot_df[['F1 Score', 'Accuracy', 'Recall', 'Precision']]
 
+  
+        plt.figure(figsize=(18, 8)) # Genişlik ve Yükseklik
+        ax = plot_df.plot(kind='bar', 
+                          figsize=(16, 8), 
+                          width=0.8,           # Sütun genişliği
+                          edgecolor='black',   # Kenar çizgileri
+                          rot=0)               # Yazıları yatay tut (0 derece)
+
+        plt.title("Comparison of ML Models - All Metrics", fontsize=16, fontweight='bold')
+        plt.ylabel("Score", fontsize=14)
+        plt.xlabel("Models", fontsize=14)
         
-        draw_barplot(axes[2], 'Recall', 'Recall Score', 'rocket')
+        plt.ylim(0, 1.15)
 
-       
-        draw_barplot(axes[3], 'Precision', 'Precision Score', 'mako')
+        plt.grid(axis='y', linestyle='--', alpha=0.5)
 
-        # Genel Başlık ve Düzenlemeler
-        plt.tight_layout(rect=[0, 0.03, 1, 0.95]) 
-        plt.subplots_adjust(top=0.92, hspace=0.3, wspace=0.25)
+        plt.legend(loc='upper right', frameon=True, fontsize=11, title="Metrics")
+
+        for container in ax.containers:
+            ax.bar_label(container, 
+                         fmt='%.2f',       
+                         padding=3,       
+                         fontsize=10,      
+                         fontweight='bold') 
+
+        plt.tight_layout()
         plt.show()
 
+        def draw_single_barplot(x_col, title, palette):
+            plt.figure(figsize=(10, 6))
+            sns.barplot(
+                x=x_col,
+                y='Model',
+                data=sonuc_df_sorted,
+                palette=palette
+            )
+            plt.title(title)
+            plt.xlim(0.0, 1.1)
+            plt.xlabel("Score")
+            plt.ylabel('Models')
 
+            for index, value in enumerate(sonuc_df_sorted[x_col]):
+                plt.text(value + 0.005, index, f'{value:.4f}', va='center', fontsize=10, fontweight='bold')
 
+            plt.tight_layout()
+            plt.show()   # 👈 BURASI ÖNEMLİ (sıralı çalışır)
 
+    # 1️⃣ F1 Score (ilk olarak)
+        draw_single_barplot('F1 Score', 'F1 Score', 'magma')
 
+    # 2️⃣ Accuracy
+        draw_single_barplot('Accuracy', 'Accuracy Score', 'viridis')
+
+    # 3️⃣ Recall
+        draw_single_barplot('Recall', 'Recall Score', 'rocket')
+
+    # 4️⃣ Precision
+        draw_single_barplot('Precision', 'Precision Score', 'mako')
+
+    
 
         #Accuracy F1 Recall Precision
 
-        """
-        Accuracy: Modelin doğru tahminlerinin toplam tahminlere oranıdır. Ancak, dengesiz veri setlerinde yanıltıcı olabilir.
-        F1 Score: Precision ve Recall'un harmonik ortalamasıdır. Dengesiz
-        veri setlerinde daha güvenilir bir performans ölçütüdür.
-        Recall: Modelin gerçek pozitifleri ne kadar iyi yakaladığını gösterir. Kritik durumlarda önemlidir.
-        Precision: Modelin pozitif tahminlerinin ne kadarının doğru olduğunu gösterir. Yanlış pozitiflerin maliyetli olduğu durumlarda önemlidir.        
-        """
+    """
+    Accuracy: Modelin doğru tahminlerinin toplam tahminlere oranıdır. Ancak, dengesiz veri setlerinde yanıltıcı olabilir.
+    F1 Score: Precision ve Recall'un harmonik ortalamasıdır. Dengesiz
+    veri setlerinde daha güvenilir bir performans ölçütüdür.
+    Recall: Modelin gerçek pozitifleri ne kadar iyi yakaladığını gösterir. Kritik durumlarda önemlidir.
+    Precision: Modelin pozitif tahminlerinin ne kadarının doğru olduğunu gösterir. Yanlış pozitiflerin maliyetli olduğu durumlarda önemlidir.        
+    """

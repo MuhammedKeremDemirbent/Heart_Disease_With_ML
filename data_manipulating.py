@@ -180,7 +180,7 @@ class dataManipulating:
         #Bir veriden kaç tane olduğu gözüküyor
         print(self.last_data['Heart Disease'].value_counts(normalize=True))
         
-
+        
         """
         Heart Disease
         0    0.853261

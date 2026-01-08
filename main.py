@@ -22,8 +22,10 @@ if __name__ =="__main__":
     print("\nProgram Başariyla Tamamlandi. Grafikler gösterildi...")
     print("Deep Learning başlatiliyor")
 
-    DL = deep_learning()
-    print("Deep Learning bitti")
+    
+
+    #DL = deep_learning()
+    #print("Deep Learning bitti")
 
 
     #Yorum satırı olan yerlere gerek yok PTAG hepsini miras aldı
