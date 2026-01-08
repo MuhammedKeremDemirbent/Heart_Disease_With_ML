@@ -1,8 +1,5 @@
-#from data_manipulating import dataManipulating
-#from test_train import testtrain
-#from choosing_model import choosing_model
 from p_tuning_and_graphs import p_tuning_and_graphs
-from deep_learning import deep_learning
+
 """
 author: Muhammed Kerem Demirbent
         Mustafa Berat Yavaş
@@ -14,21 +11,9 @@ Dataset unbalance bir yapiya sahiptir ve performans sonuçlari biraz olsun düş
 
 if __name__ =="__main__":
     print("Program Başlatiliyor...")
-    #DM = dataManipulating()
-    #TT = testtrain()
-    #CM = choosing_model()
     PTAG = p_tuning_and_graphs()
     
     print("\nProgram Başariyla Tamamlandi. Grafikler gösterildi...")
-    print("Deep Learning başlatiliyor")
-
-    
-
-    #DL = deep_learning()
-    #print("Deep Learning bitti")
-
-
-    #Yorum satırı olan yerlere gerek yok PTAG hepsini miras aldı
 
     """
         İlk olarak data_manipulating.py dosyasindaki dataManipulating sinifi çağrilir. 
@@ -44,7 +29,5 @@ if __name__ =="__main__":
         Bu sinif, modellerin hiperparametrelerini ayarlar ve performans sonuçlarini grafiklerle görselleştirir.
 
         Bu yapiyla, kalp krizi riskini tahmin etmek için kapsamli bir makine öğrenimi süreci gerçekleştirilir.
-        
-        Bu adimlardan sonra deep_learning.py dosyasindaki deep_learning sinifi çağrilir.
-        Bu sinif, derin öğrenme modellerini kullanarak kalp krizi riskini tahmin eder.
+    
     """

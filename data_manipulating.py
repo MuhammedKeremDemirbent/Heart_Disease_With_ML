@@ -37,11 +37,9 @@ class dataManipulating:
         heart_disease= pure_data.iloc[:,-1].values
         heart_disease = heart_disease.reshape(-1, 1)
 
-
         from sklearn.impute import SimpleImputer
 
         #1.2.0 Eksik verileri düzenleme
-
 
         #1.2.1 Nümerik olanlar 
         imputer_numerics = SimpleImputer(missing_values=np.nan, strategy='mean')
@@ -102,7 +100,6 @@ class dataManipulating:
 
         restecg =OneHotEncode.fit_transform(restecg).toarray()
 
-
         #1.3.3 Sütunlara ad verme işlemi
 
         #1.3.3.1 Kategoric Olanlar
@@ -116,20 +113,17 @@ class dataManipulating:
 
         heart_disease['Heart Disease'] = heart_disease['Heart Disease'].apply(lambda x: 1 if x >= 3 else 0)
 
-
         #1.3.3.2 Nümerik Olanlar
         age= pd.DataFrame(data=age, index = range(920), columns = ['Age'])
         trestbps= pd.DataFrame(data=trestbps, index = range(920), columns = ['Trestbps'])
         cholesterol= pd.DataFrame(data=cholesterol, index = range(920), columns = ['Cholesterol'])
         thalc= pd.DataFrame(data=thalc, index = range(920), columns = ['Thalc'])
 
-
         #1.4.0 Bütün verileri tek set halinde toplama 
         #Makineden istediğimiz veriyi ayrı tutacağız teste sokarken anlaması için (heart_disease bağımlı değişken)
 
         categoric_datas = pd.concat([gender,dataset,chest_pain_type,fbs,restecg],axis=1)
         numeric_datas= pd.concat([age,trestbps,cholesterol,thalc],axis=1)
-
 
         self.last_data_without_target = pd.concat([categoric_datas,numeric_datas],axis=1)
 
@@ -149,12 +143,10 @@ class dataManipulating:
 
         self.last_data=pd.concat([self.last_data_without_target,heart_disease],axis=1)
 
-
         covariance = self.last_data_without_target["Age"].cov(self.last_data["Heart Disease"])
         print(covariance)
 
         #1.5.1 Outlier özellikli olan verileri datasetin dışına çıkartıyoruz
-
         #1.5.1.1 Çeyrek değerleri ayarlama
 
         outlier_list = self.last_data_without_target[['Thalc', 'Trestbps', 'Age']]

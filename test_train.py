@@ -33,8 +33,7 @@ class testtrain(dataManipulating):
         from statsmodels.stats.outliers_influence import variance_inflation_factor
 
         #2.2.2 VIF Analizi (Verilerin kendi arasındaki etkileşim oranlarını ölçer verilerin VIF değeri 5 ten yüksekse sıkıntı oluyor)
-
-        
+    
         import statsmodels.api as sm
         from statsmodels.stats.outliers_influence import variance_inflation_factor
         import matplotlib.pyplot as plt
@@ -77,9 +76,9 @@ class testtrain(dataManipulating):
         self.X_train =StandardScale.fit_transform(self.X_train_smote)
         self.X_test = StandardScale.transform(self.x_test)
 
+"""
         print("--- MODELİN BEKLEDİĞİ SÜTUN SIRASI ---")
         # Eğer X_train bir pandas DataFrame ise:
         print(list(self.last_data_without_outliers.columns))
 
-#########################################################################################################################################################################################
-#stratify = y
+"""

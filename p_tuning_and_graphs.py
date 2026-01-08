@@ -4,7 +4,6 @@ import pandas as pd
 
 #4.0.0 Performans sonuçları ve gerekli grafikler
 
-
 """
 Bu kodda elde edilen bütün sonuçlarin görsellemesi yapilmiştir. Çiktilarin correlasyon matrisleri, correlasyon katsayilari,
 parametrelerin(thalc) dağalimlari performans metrik skorlari ve sirasi ele alinmiştir.
@@ -15,9 +14,11 @@ class p_tuning_and_graphs(choosing_model):
     def __init__(self):
         super().__init__()
 
-        import pandas as pd # Series işlemi için gerekli olabilir
+        import pandas as pd 
 
-        # --- AYARLAR ---
+        #4.1.0 Temel grafikler
+        #Bu grafikler veri setinin genel yapisini gösterir
+
         navy = '#000080'    # Lacivert
         red = '#FF0000'     # Kırmızı
         yellow = '#FFD700'  # Sarı
@@ -30,9 +31,9 @@ class p_tuning_and_graphs(choosing_model):
 
         total_count = len(self.last_data)
 
-        # ==========================================
-        # 1. CİNSİYET (GENDER)
-        # ==========================================
+        
+        #4.1.1  CİNSİYET
+        
         gender_counts = self.last_data['Female'].value_counts()
         male_count = gender_counts.get(0, 0)   
         female_count = gender_counts.get(1, 0) 
@@ -49,9 +50,8 @@ class p_tuning_and_graphs(choosing_model):
         plt.yticks(fontsize=tick_size)
         plt.show()
 
-        # ==========================================
-        # 2. KAYNAK BÖLGE (DATASET SOURCE)
-        # ==========================================
+        
+        #4.1.2 DATASET          
         c_cleveland = self.last_data['Cleveland'].sum()
         c_hungary = self.last_data['Hungary'].sum()
         c_switz = self.last_data['Switzerland'].sum()
@@ -61,7 +61,7 @@ class p_tuning_and_graphs(choosing_model):
         r_counts = [c_cleveland, c_hungary, c_switz, c_va]
         
         plt.figure(figsize=hd_res)
-        # Renkler: Lacivert, Yeşil, Kırmızı, Sarı
+
         bars = plt.bar(regions, r_counts, color=[navy, green, red, yellow])
 
         for bar in bars:
@@ -75,9 +75,8 @@ class p_tuning_and_graphs(choosing_model):
         plt.show()
 
     
-        # ==========================================
-        # 6. KAN BASINCI (TRESTBPS)
-        # ==========================================
+        
+        #4.1.3 GÖĞÜS AĞRISI TİPİ       
         plt.figure(figsize=hd_res)
         plt.hist(self.last_data['Trestbps'], bins=20, color=navy, edgecolor='black')
         
@@ -87,9 +86,9 @@ class p_tuning_and_graphs(choosing_model):
         plt.yticks(fontsize=tick_size)
         plt.show()
 
-        # ==========================================
-        # 7. MAKSİMUM NABIZ (THALC)
-        # ==========================================
+        
+        #4.1.4 THALACH
+        #        
         plt.figure(figsize=hd_res)
         plt.hist(self.last_data['Thalc'], bins=20, color=navy, edgecolor='black')
 
@@ -99,9 +98,9 @@ class p_tuning_and_graphs(choosing_model):
         plt.yticks(fontsize=tick_size)
         plt.show()
 
-        # ==========================================
-        # 8. YAŞ (AGE)
-        # ==========================================
+        
+        #4.1.5 YAŞ
+        #         
         plt.figure(figsize=hd_res)
         plt.hist(self.last_data['Age'], bins=20, color=navy, edgecolor='black')
 
@@ -111,9 +110,8 @@ class p_tuning_and_graphs(choosing_model):
         plt.yticks(fontsize=tick_size)
         plt.show()
 
-        # ==========================================
-        # 9. HEDEF DEĞİŞKEN (HEART DISEASE)
-        # ==========================================
+        
+        #4.1.6 HEDEF DEĞİŞKEN DAĞILIMI        
         target_counts = self.last_data['Heart Disease'].value_counts()
         
         plt.figure(figsize=hd_res)
@@ -131,7 +129,7 @@ class p_tuning_and_graphs(choosing_model):
         
         import seaborn as sns
         
-        #4.1.0 Gradient Boosting parametrelerin önem sırası
+        #4.2.0 Gradient Boosting parametrelerin önem sırası
         self.X_features = self.x_train.columns 
 
         importance_df = pd.DataFrame({
@@ -180,7 +178,7 @@ class p_tuning_and_graphs(choosing_model):
         plt.close()
 
         #4.5.0 Performans skorları (Accuracy, F1, Recall, Precision)
-        # GÜNCELLEME: Recall ve Precision kütüphaneleri eklendi
+
         from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score
         from collections import OrderedDict
 
@@ -196,12 +194,13 @@ class p_tuning_and_graphs(choosing_model):
             ('Gradient Boosting', self.y_pred_gbc)
         ])
 
-        # Sonuçları depolamak için boş bir liste
+      
         performance_results = []
 
         #4.5.2 Performans metrikleri
         print("\n\n--- Performance Metrics of All Models ---")
         for model_name, y_pred in models.items():
+
             #4.5.3 Modellerin performans metriklerini hesaplama
             accuracy = accuracy_score(self.y_test, y_pred)          
             f1 = f1_score(self.y_test, y_pred, average='weighted')      
@@ -216,11 +215,10 @@ class p_tuning_and_graphs(choosing_model):
                 'Precision': f'{precision:.4f}' 
             })
 
-        #4.5.3 Sonuçları DataFrame'e çevirip yazdırma
+        #4.5.4 Sonuçları DataFrame'e çevirip yazdırma
         sonuc_df = pd.DataFrame(performance_results)
         print(sonuc_df.sort_values(by='F1 Score', ascending=False).to_markdown(index=False))
 
-        # En iyi modeli vurgulayalım
         best_model = sonuc_df.sort_values(by='F1 Score', ascending=False).iloc[0]
         print(f"\n The Best F1 Score: {best_model['Model']} ({best_model['F1 Score']})")
 
@@ -236,13 +234,11 @@ class p_tuning_and_graphs(choosing_model):
         
         plt.style.use('ggplot') 
 
-
         plot_df = sonuc_df.sort_values(by='F1 Score', ascending=False).set_index('Model')
-
         plot_df = plot_df[['F1 Score', 'Accuracy', 'Recall', 'Precision']]
 
   
-        plt.figure(figsize=(18, 8)) # Genişlik ve Yükseklik
+        plt.figure(figsize=(18, 8)) 
         ax = plot_df.plot(kind='bar', 
                           figsize=(16, 8), 
                           width=0.8,           # Sütun genişliği
@@ -286,23 +282,17 @@ class p_tuning_and_graphs(choosing_model):
                 plt.text(value + 0.005, index, f'{value:.4f}', va='center', fontsize=10, fontweight='bold')
 
             plt.tight_layout()
-            plt.show()   # 👈 BURASI ÖNEMLİ (sıralı çalışır)
+            plt.show()   
 
-    # 1️⃣ F1 Score (ilk olarak)
+   
         draw_single_barplot('F1 Score', 'F1 Score', 'magma')
-
-    # 2️⃣ Accuracy
         draw_single_barplot('Accuracy', 'Accuracy Score', 'viridis')
-
-    # 3️⃣ Recall
         draw_single_barplot('Recall', 'Recall Score', 'rocket')
-
-    # 4️⃣ Precision
         draw_single_barplot('Precision', 'Precision Score', 'mako')
 
     
 
-        #Accuracy F1 Recall Precision
+       
 
     """
     Accuracy: Modelin doğru tahminlerinin toplam tahminlere oranıdır. Ancak, dengesiz veri setlerinde yanıltıcı olabilir.

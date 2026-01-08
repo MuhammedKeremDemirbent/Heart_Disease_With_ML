@@ -11,8 +11,7 @@ from sklearn.pipeline import Pipeline
 
 """
 Bu kodda bütün modellerin performans sonuçlari correlasyon matrisi ile kontrol edilmiştir.
-GridSearch ile en iyi hiperparametreleri bulacağiz.
-Burada ek olarak modelleri ONNX formatinda kaydetme yapilmiştir
+Burada ek olarak SVM modelini ONNX formatinda kaydetme yapilmiştir
 
 """
 
@@ -75,7 +74,6 @@ class choosing_model(testtrain):
 
         print(grid_score)
 """
-
         self.cm_knn = confusion_matrix(self.y_test,self.y_pred_knn)
 
         print("KNN")
@@ -101,6 +99,8 @@ class choosing_model(testtrain):
         import onnxmltools.utils
         from sklearn.pipeline import Pipeline
 
+        #3.3.1 Modeli ONNX formatına dönüştürme ve kaydetme
+
         pipe = Pipeline([
             ('scaler', StandardScaler()), 
             ('svc', SVC(kernel="rbf", class_weight="balanced", probability=True)) 
@@ -108,15 +108,10 @@ class choosing_model(testtrain):
 
         pipe.fit(self.X_train_smote, self.y_train_smote) 
 
-        # 2. ONNX'e Dönüştür
-        # Giriş tipi ham verinin boyutuna göre (X_train_smote ile aynı)
-        initial_type = [('input', FloatTensorType([None, self.X_train_smote.shape[1]]))]
-
-        # zipmap=False C# için önemli
+        initial_type = [('input', FloatTensorType([None, self.X_train_smote.shape[1]]))]   
         onnx_model = convert_sklearn(pipe, initial_types=initial_type, target_opset=12, 
                                         options={'zipmap': False})
-
-        # 3. Kaydet (Eski dosyanın üzerine yazsın)
+        
         onnxmltools.utils.save_model(onnx_model, 'Trash/heart_disease_model.onnx')
         print("Model başarıyla düzeltildi ve kaydedildi.")
 
@@ -165,7 +160,7 @@ class choosing_model(testtrain):
         self.xgb_model = XGBClassifier(
             objective='binary:logistic', # objective='multi:softmax'  0 1 2 3 4
             n_estimators=50, 
-            eval_metric='logloss',       # Binary için 'logloss' veya 'error' daha yaygındır
+            eval_metric='logloss',       # Binary için logloss veya error daha yaygındır
             random_state=10,
         )
 
@@ -177,20 +172,7 @@ class choosing_model(testtrain):
 
         print("XGBoost")
         print(self.cm_xgb)
-        """
-        #3.7.1 Modeli uygulamaya uygun hale getirmek
-        import xgboost as xgb
-        import onnxmltools
-        from onnxmltools.convert.common.data_types import FloatTensorType
-
-        # ONNX'e dönüştürme
-        initial_type = [('input', FloatTensorType([None, self.X_train.shape[1]]))]
-        onnx_model = onnxmltools.convert_xgboost(self.xgb_model, initial_types=initial_type)
-
-        # ONNX dosyasını kaydetme
-        onnxmltools.utils.save_model(onnx_model, 'Trash\heart_disease_model.onnx')
-        """
-
+        
         #3.8.0
         from sklearn.ensemble import GradientBoostingClassifier
 
@@ -209,27 +191,23 @@ class choosing_model(testtrain):
         print(self.cm_gbc)
 
 
-
-
+        #3.9.0 Confusion Matrix Görselleştirme
         confusion_matrices = [
             (self.cm_gbc, "Gradient Boosting"),
             (self.cm_knn, "KNN"),
             (self.cm_svc, "SVM")
         ]
 
-        # Döngü ile hepsini tek tek Matplotlib kullanarak çiz
         for cm, title in confusion_matrices:
             self.draw_matrix_matplotlib(cm, title)
-
-    # Bu fonksiyonu sınıfın içine (def __init__ hizasına değil, sınıfın metodu olarak) ekle
+  
     def draw_matrix_matplotlib(self, cm, title):
         fig, ax = plt.subplots(figsize=(5, 5))
         
-        # Matrisi renklendir (imshow kullanılır)
+        
         cax = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Purples)
         ax.set_title(f"{title} Confusion Matrix")
-        
-        # Yan tarafa renk barı ekle
+
         fig.colorbar(cax)
 
         # Eksenleri ayarla
@@ -239,7 +217,6 @@ class choosing_model(testtrain):
         ax.set_xlabel('Predicted')
         ax.set_ylabel('Actual')
 
-        # SAYILARI KUTULARIN İÇİNE YAZDIRMA (En önemli kısım)
         thresh = cm.max() / 2.
         for i in range(cm.shape[0]):
             for j in range(cm.shape[1]):
@@ -249,8 +226,6 @@ class choosing_model(testtrain):
                         color="white" if cm[i, j] > thresh else "black",
                         fontsize=12, fontweight='bold')
 
-        plt.tight_layout() # Kenar boşluklarını otomatik ayarla
+        plt.tight_layout() # Kenar boşluklarını otomatik ayarlama işlemi
         plt.show()
-
-#########################################################################################################################################################################
 
